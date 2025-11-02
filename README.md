@@ -28,6 +28,6 @@ It’s designed for **secure, private, and real-time communication**, ensuring y
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/rahas.git
+   git clone https://github.com/Nadil-Dulran/rahas.git
    cd rahas
    ```
