@@ -2,6 +2,7 @@ import express from "express";
 import "dotenv/config";
 import cors from "cors";
 import http from "http";
+import { connectDB } from "./lib/db.js";
 
 // Create Express app and HTTP server
 
@@ -14,6 +15,12 @@ app.use(express.json({ limit: "4mb" }));
 
 // Sample route
 app.use("/api/status", (req, res) => res.send("Server is running..."));
+
+
+// Database connection (MongooDB)
+await connectDB();
+
+
 
 // Start server
 const PORT = process.env.PORT || 5001;
