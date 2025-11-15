@@ -56,3 +56,10 @@ export const login = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 }
+
+// Controller to check if user is authenticated (protected route & handled by auth middleware)
+export const checkAuth = (req, res) => {
+        res.json({ success: true, user: req.user});
+}
+// Handle users
+
