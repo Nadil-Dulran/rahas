@@ -1,3 +1,7 @@
+import User from "../models/User.js";
+import Message from "../models/Message.js";
+
+
 // Get all users except the logged-in user
 export const getUsersForSidebar = async (req, res) => {
     try {
@@ -7,12 +11,19 @@ export const getUsersForSidebar = async (req, res) => {
         // Count of unread messages for each user
         const unseenMessages = {}
         const promises = filteredUsers.map(async (user) => {
-            const count = await Message.find({ senderId: user._id, receiverId: UserId, seen: false }).countDocuments();
-            unseenMessages[user._id] = count;
-        }
-        );}
-        catch (error) {
+            const messages = await Message.find({ senderId: user._id, receiverId: UserId, seen: false });
+            if(messages.length > 0){
+                unseenMessages[user._id] = messages.length;
+            }
+        })
+        await Promise.all(promises);
+        res.json({ success: true, users: filteredUsers, unseenMessages });
+        } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });
     }   
     }
+
+    // Get all messages for selected chat user
+
+    
