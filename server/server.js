@@ -4,6 +4,7 @@ import cors from "cors";
 import http from "http";
 import { connectDB } from "./lib/db.js";
 import userRoutes from "./routes/userRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 // Create Express app and HTTP server
 
@@ -17,6 +18,7 @@ app.use(express.json({ limit: "4mb" }));
 // Routes setup
 app.use("/api/status", (req, res) => res.send("Server is running..."));
 app.use("/api/auth", userRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Database connection (MongooDB)
 await connectDB();
