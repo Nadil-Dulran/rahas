@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Homepage from './pages/Homepage.jsx'
 import Loginpage from './pages/Loginpage.jsx'
 import Profilepage from './pages/Profilepage.jsx'
@@ -9,14 +9,14 @@ import {Toaster} from 'react-hot-toast';
 const App = () => {
   const [theme, setTheme] = useState('dark') // or 'light'
   const isDark = theme === 'dark'
-
+const {authUser} = useContext(AuthContext)
   return (
     <GradientBackground theme={theme}>
       <Toaster/>
       <Routes>
-        <Route path="/" element={<Homepage />} />
-        <Route path="/login" element={<Loginpage />} />
-        <Route path="/profile" element={<Profilepage />} />
+        <Route path="/" element={authUser ? <Homepage /> : <Navigate to="/login" />} />
+        <Route path="/login" element={!authUser ? <Loginpage /> : <Navigate to="/" />} />
+        <Route path="/profile" element={authUser ? <Profilepage /> : <Navigate to="/login" />} />
       </Routes>
       {/* Sun/Moon icon toggle (no traditional button element) */}
       <div
