@@ -5,6 +5,7 @@ import Loginpage from './pages/Loginpage.jsx'
 import Profilepage from './pages/Profilepage.jsx'
 import { GradientBackground } from './components/GradientBackground.jsx'
 import {Toaster} from 'react-hot-toast';
+import { AuthContext } from '../context/AuthContext.jsx'
 
 const App = () => {
   const [theme, setTheme] = useState('dark') // or 'light'
