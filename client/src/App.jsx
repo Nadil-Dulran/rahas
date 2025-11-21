@@ -4,6 +4,7 @@ import Homepage from './pages/Homepage.jsx'
 import Loginpage from './pages/Loginpage.jsx'
 import Profilepage from './pages/Profilepage.jsx'
 import { GradientBackground } from './components/GradientBackground.jsx'
+import {Toaster} from 'react-hot-toast';
 
 const App = () => {
   const [theme, setTheme] = useState('dark') // or 'light'
@@ -11,6 +12,7 @@ const App = () => {
 
   return (
     <GradientBackground theme={theme}>
+      <Toaster/>
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/login" element={<Loginpage />} />
