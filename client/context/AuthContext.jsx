@@ -28,6 +28,42 @@ const checkAuth = async () => {
         }
     }
 
+// Login function to handle user authintication and socket connection
+    const login = async (state, credentials) => {
+        try {
+            const {data} = await axios.post(`/api/auth/${state}`, credentials);
+            if (data.success) {
+                setAuthUser(data.userData);
+                connectSocket(data.userData);
+                axios.defaults.headers.common["token"] = data.token;
+                setToken(data.token);
+                localStorage.setItem("token", data.token);
+                toast.success(data.message);
+            } else{
+                toast.error(data.message);
+            }
+
+        } catch (error) {
+            toast.error(error.message)
+        }
+    }
+
+// Logout function to handle user logout and disconnect socket
+
+const logout = async () => {
+    localStorage.removeItem("token");
+    setToken(null);
+    setAuthUser(null);
+    setOnlineUsers([]);
+    axios.defaults.headers.common["token"] = null;
+    toast.success("Logged out successfully")
+    socket.disconect();
+}
+
+
+
+
+
     // Connect socket function to handle socket connection and online users updates
     const connectSocket = (userData) => {
         if(!userData || socket?.connected) return;
