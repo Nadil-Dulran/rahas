@@ -20,8 +20,8 @@ const checkAuth = async () => {
         try {
             const {data} = await axios.get("/api/auth/check");
             if (data.success) {
-                setAuthUser(data.user);
-                // Initialize socket connection here if needed
+                setAuthUser(data.user)
+                connectSocket(data.user)
             }
         } catch (error) {
             toast.error(error.message)
@@ -29,7 +29,7 @@ const checkAuth = async () => {
     }
 
     // Connect socket function to handle socket connection and online users updates
-    const connectSocket = (newSocket) => {
+    const connectSocket = (userData) => {
         if(!userData || socket?.connected) return;
         const newSocket = io(backendURL, {
             query: { userId: userData._id,
