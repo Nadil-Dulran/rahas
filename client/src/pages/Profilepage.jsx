@@ -1,33 +1,54 @@
-import React, { useContext, useState} from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import assets from '../assets/assets'
 import { AuthContext } from '../../context/AuthContext.jsx'
 
 const Profilepage = () => {
 
-  const {authUser, updateProfile} = useContext(AuthContext);
+  const { authUser, updateProfile } = useContext(AuthContext)
 
-  const [selectedImg, setSelectedImg] = useState(null);
-  const navigate = useNavigate();
-  const[name, setName] = useState("Martin Johnson");
-  const[bio, setBio] = useState("Hi Everyone, I am Using RahasChat");
+  const [selectedImg, setSelectedImg] = useState(null)
+  const navigate = useNavigate()
+  // Initialize safely; authUser may be null on first render
+  const [name, setName] = useState(authUser?.fullName || authUser?.fullname || '')
+  const [bio, setBio] = useState(authUser?.bio ?? 'Hi Everyone, I am Using RahasChat')
 
-  const handleSubmit = async (e)=> {
-    e.preventDefault();
-    if(!selectedImg) {
-      await updateProfile({fullname: name, bio});
-    navigate('/');
-      return;
+  // Keep form state in sync when authUser loads/changes
+  useEffect(() => {
+    if (authUser) {
+      setName(authUser.fullName || authUser.fullname || '')
+      setBio(authUser.bio ?? 'Hi Everyone, I am Using RahasChat')
     }
+  }, [authUser])
 
-    const reader = new FileReader();
-    reader.readAsDataURL(selectedImg);
-    reader.onloadend = async () => {
-      const base64data = reader.result;
-      await updateProfile({profilePic: base64data, fullname: name, bio});
-      navigate('/');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const nameToSend = name || "";
+
+  // prepare payload keys that backend expects: fullName, bio, profilePic
+  if (!selectedImg) {
+    try {
+      await updateProfile({ fullName: nameToSend, bio });
+      navigate("/");
+    } catch (error) {
+      console.error("Profile update failed:", error);
     }
+    return;
   }
+
+  const reader = new FileReader();
+  reader.readAsDataURL(selectedImg);
+  reader.onloadend = async () => {
+    try {
+      const base64data = reader.result; // data:image/...
+      await updateProfile({ fullName: nameToSend, bio, profilePic: base64data });
+      navigate("/");
+    } catch (error) {
+      console.error("Profile update with image failed:", error);
+    }
+  };
+};
+
   return (
     <div className='min-h-screen bg-cover bg-no-repeat flex items-center justify-center'>
       <div className='w-5/6 max-w-2xl backdrop-blur-2xl text-gray-400 border-2 border-gray-600 flex items-center justify-between max-sm:flex-col-reverse rounded-lg'>
@@ -42,7 +63,7 @@ const Profilepage = () => {
             <textarea onChange={(e)=>setBio(e.target.value)} value={bio} placeholder="Write your bio..." required className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500' rows={4}></textarea>
             <button type="Submit" className='py-3 bg-linear-to-r from-purple-500 to-violet-700 text-white rounded-md cursor-pointer'>Save</button>
         </form>
-        <img className={'max-w-44 aspect-square mx-10 max-sm:mt-10'} src={assets.logo_icon} alt="" />
+        <img className={`max-w-44 aspect-square mx-10 max-sm:mt-10 ${selectedImg && 'rounded-full'}`} src={authUser?.profilePic || assets.logo_icon} alt="" />
       </div>
 
     </div>
