@@ -38,12 +38,23 @@ io.on("connection", (socket) => {
     })
 })
 
+// === CORS + body parsers (replace your existing app.use(cors()) and express.json limit)
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+  allowedHeaders: ["Content-Type", "token", "Authorization", "Accept"],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
     
 
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: "4mb" }));
+app.use(express.json({ limit: "20mb" }));
 
 // Routes setup
 app.use("/api/status", (req, res) => res.send("Server is running..."));
