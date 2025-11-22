@@ -64,26 +64,46 @@ export const checkAuth = (req, res) => {
         res.json({ success: true, user: req.user});
 }
 // Handle users (function to handle profile)
+
 export const updateProfile = async (req, res) => {
-    try {
-        const { fullName, bio, profilePic } = req.body;
+  try {
+    // Log request info (this must be INSIDE the handler so req is defined)
+    console.log("UPDATE PROFILE CALLED. USER ID:", req.user?._id);
+    console.log("UPDATE PROFILE BODY:", req.body);
 
-        const userId = req.user._id;
-        let updatedUser;
+    // Normalize expected fields from the client
+    const fullName = req.body.fullName ?? req.body.fullname;
+    const bio = req.body.bio;
+    const profilePic = req.body.profilePic ?? req.body.profilepic; // base64 data URL expected
 
-        if(profilePic){
-            updatedUser = await User.findByIdAndUpdate(userId, {bio, fullName}, { new: true });
-        } else {
-            const upload = await cloudinary.uploader.upload(profilePic);
+    // Build update object (only include keys that are present)
+    const updateData = {};
+    if (fullName !== undefined) updateData.fullName = fullName;
+    if (bio !== undefined) updateData.bio = bio;
 
-            updatedUser = await User.findByIdAndUpdate(userId, {profilePic: upload.secure_url, bio, fullName}, { new: true });
-        }
-        
-        res.json({ success: true, user: updatedUser})
-    }catch (error) {
-        console.log(error.message);
-        res.json({ success: false, message: error.message });
+    // If the client sent a profile picture (data URL), upload it
+    if (profilePic) {
+      console.log("Uploading profile picture to Cloudinary...");
+      const uploaded = await cloudinary.uploader.upload(profilePic, {
+        folder: "rahas/profile_pics",
+        overwrite: true,
+      });
+      console.log("Cloudinary uploaded:", uploaded.secure_url);
+      updateData.profilePic = uploaded.secure_url;
     }
-}
-            
+
+    // Update the user in DB and return the new document
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      updateData,
+      { new: true }
+    ).select("-password");
+
+    console.log("User updated:", !!user);
+    return res.json({ success: true, user });
+  } catch (error) {
+    console.error("UPDATE PROFILE ERROR:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};           
 
