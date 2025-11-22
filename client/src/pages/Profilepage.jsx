@@ -63,7 +63,7 @@ const handleSubmit = async (e) => {
             <textarea onChange={(e)=>setBio(e.target.value)} value={bio} placeholder="Write your bio..." required className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500' rows={4}></textarea>
             <button type="Submit" className='py-3 bg-linear-to-r from-purple-500 to-violet-700 text-white rounded-md cursor-pointer'>Save</button>
         </form>
-        <img className={`max-w-44 aspect-square mx-10 max-sm:mt-10 ${selectedImg && 'rounded-full'}`} src={authUser?.profilePic || assets.logo_icon} alt="" />
+        <img className={`max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10 ${selectedImg && 'rounded-full'}`} src={authUser?.profilePic || assets.logo_icon} alt="" />
       </div>
 
     </div>
