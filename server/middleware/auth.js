@@ -7,19 +7,29 @@ import jwt from "jsonwebtoken";
 export const protectRoute = async (req, res, next) => {
     try{
         const token = req.headers.token;
+        
+        console.log("=== PROTECT ROUTE DEBUG ===");
+        console.log("Token received:", token ? "Token exists" : "No token");
+
+        if (!token) {
+            console.log("ERROR: No token provided");
+            return res.json({ success: false, message: "Unauthorized Access - No token" });
+        }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        console.log("Token decoded successfully, userId:", decoded.userId);
 
-        const user = await User.findById(decoded.userID).select("-password");
+        const user = await User.findById(decoded.userId).select("-password");
+        console.log("User found:", user ? user.email : "No user");
 
-        if(!user)  return res.json({ success: false, message: "Unauthorized Access" });
+        if(!user)  return res.json({ success: false, message: "Unauthorized Access - User not found" });
         
         req.user = user;
         next();
 
     } catch(error){
-        console.log(error.message);
-        res.json({ success: false, message: "Unauthorized Access" });   
+        console.log("PROTECT ROUTE ERROR:", error.message);
+        res.json({ success: false, message: "Unauthorized Access - " + error.message });   
     }
 
 }
