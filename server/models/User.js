@@ -22,6 +22,10 @@ const userScema = new mongoose.Schema({
     bio: {
         type: String,
         default: ''
+    },
+    lastSeen: {
+        type: Date,
+        default: Date.now
     }
 }, { timestamps: true });
 
