@@ -38,12 +38,18 @@ const ChatContainer = () => {
   }
     reader.readAsDataURL(file)
   }
+
+  useEffect(() => {
+    if(selectedUser){
+        getMessages(selectedUser._id);
+    }
+  }, [selectedUser])
   
     useEffect(() => {
-      if (scrollEnd.current) {
+      if (scrollEnd.current && messages) {
         scrollEnd.current.scrollIntoView({ behavior: "smooth" });
       }
-    }, []);
+    }, [messages]);
 
     return selectedUser ? (
     <div className='h-full overflow-scroll relative backdrop-blur-lg'>
@@ -56,15 +62,15 @@ const ChatContainer = () => {
         </div>
         {/* Chat Messages */}
         <div className='flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3 pb-6'>
-            {messagesDummyData.map((msg, index) => (
-                <div key={index} className={`flex items-end gap-2 justify-end ${msg.senderId !== '680f50e4f10f3cd28382ecf9' && 'flex-row-reverse'}`}>
+            {messages.map((msg, index) => (
+                <div key={index} className={`flex items-end gap-2 justify-end ${msg.senderId !== authUser._id && 'flex-row-reverse'}`}>
                     {msg.image ?(<img src={msg.image} alt="" className='max-w-[230px] border border-gray-700 rounded-lg overflow-hidden mb-8'/>): (
-                        <p className={`p-2 max-w-[200px] md:text-sm font-light rounded-lg mb-8 break-all bg-violet-500/30 text-white ${msg.senderId === '680f50e4f10f3cd28382ecf9' ? 'rounded-br-none' : 'rounded-bl-none'}`}>
+                        <p className={`p-2 max-w-[200px] md:text-sm font-light rounded-lg mb-8 break-all bg-violet-500/30 text-white ${msg.senderId === authUser._id ? 'rounded-br-none' : 'rounded-bl-none'}`}>
                             {msg.text}
                         </p>
                     )}
                     <div className="text-center text-xs">
-                        <img src={msg.senderId === '680f50e4f10f3cd28382ecf9' ? assets.avatar_icon : assets.profile_martin} alt="" className='w-7 rounded-full' />
+                        <img src={msg.senderId === authUser._id ? authUser?.profilePic || assets.avatar_icon : selectedUser?.profilePic || assets.avatar_icon} alt="" className='w-7 rounded-full' />
                         <p className='text-gray-500'>{formatMessageTime(msg.createdAt)}</p>
                     </div>
                 </div>
