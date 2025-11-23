@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
     const [authUser, setAuthUser] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
     const [socket, setSocket] = useState(null);
+    const [isWebSocketEnabled, setIsWebSocketEnabled] = useState(false);
 
 // Check if user is authenticated and if, set the user data and connect socket
 const checkAuth = async () => {
@@ -103,16 +104,67 @@ const updateProfile = async (body) => {
     // Connect socket function to handle socket connection and online users updates
     const connectSocket = (userData) => {
         if(!userData || socket?.connected) return;
-        const newSocket = io(backendUrl, {
-            query: { userId: userData._id,
+        
+        // First check if WebSocket is available
+        checkWebSocketStatus().then((enabled) => {
+            if (enabled) {
+                const newSocket = io(backendUrl, {
+                    query: { userId: userData._id }
+                });
+                
+                newSocket.on('connect', () => {
+                    console.log('WebSocket connected successfully');
+                    setIsWebSocketEnabled(true);
+                });
+                
+                newSocket.on('connect_error', (error) => {
+                    console.log('WebSocket connection failed:', error);
+                    setIsWebSocketEnabled(false);
+                    newSocket.disconnect();
+                });
+                
+                setSocket(newSocket);
+
+                newSocket.on("getOnlineUsers", (userIds) => {
+                    setOnlineUsers(userIds);
+                });
+            } else {
+                console.log('WebSocket not available, using polling fallback');
+                setIsWebSocketEnabled(false);
+                startOnlineUsersPolling();
             }
         });
-        newSocket.connect();
-        setSocket(newSocket);
-
-        newSocket.on("getOnlineUsers", (userIds) => {
-            setOnlineUsers(userIds);
-        })
+    }
+    
+    // Check if WebSocket is available on the server
+    const checkWebSocketStatus = async () => {
+        try {
+            const {data} = await axios.get("/api/websocket-status");
+            return data.enabled;
+        } catch (error) {
+            console.log('Error checking WebSocket status:', error);
+            return false;
+        }
+    }
+    
+    // Fallback: Poll for online users when WebSocket is not available
+    const startOnlineUsersPolling = () => {
+        const pollOnlineUsers = async () => {
+            try {
+                const {data} = await axios.get("/api/auth/online-users");
+                if (data.success) {
+                    setOnlineUsers(data.onlineUsers);
+                }
+            } catch (error) {
+                console.log('Error polling online users:', error);
+            }
+        };
+        
+        // Poll every 30 seconds
+        const interval = setInterval(pollOnlineUsers, 30000);
+        pollOnlineUsers(); // Initial call
+        
+        return () => clearInterval(interval);
     }
 
     useEffect(() => {
@@ -130,6 +182,7 @@ const updateProfile = async (body) => {
         authUser,
         onlineUsers,
         socket,
+        isWebSocketEnabled,
         login,
         logout,
         updateProfile,

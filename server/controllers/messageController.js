@@ -84,9 +84,9 @@ export const sendMessage = async (req, res) => {
             image: imageUrl
         })
 
-        // Emit the new message to the receiver's socket
+        // Emit the new message to the receiver's socket (if WebSocket is available)
         const receiverSocketId = userSocketMap[receiverId];
-        if (receiverSocketId) {
+        if (io && receiverSocketId) {
             io.to(receiverSocketId).emit("newMessage", newMessage)
         }
 

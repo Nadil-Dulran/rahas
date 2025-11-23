@@ -11,7 +11,7 @@ export const ChatProvider = ({ children }) => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [unseenMessages, setUnseenMessages] = useState({});
 
-    const {socket, axios} = useContext(AuthContext);
+    const {socket, axios, isWebSocketEnabled} = useContext(AuthContext);
 
 // Function to get all users for sidebar
     const getUsers = async () => {
@@ -54,7 +54,11 @@ export const ChatProvider = ({ children }) => {
 
 // Function to subcribe to messages for selected user
     const subscribeToMessages = () => {
-        if(!socket) return;
+        if(!socket || !isWebSocketEnabled) {
+            // If WebSocket is not available, start polling for new messages
+            startMessagePolling();
+            return;
+        }
 
         socket.on("newMessage", (newMessage) => {
             if(selectedUser && newMessage.senderId === selectedUser._id){
@@ -68,10 +72,30 @@ export const ChatProvider = ({ children }) => {
             }
         })
     }
+    
+    // Fallback: Poll for new messages when WebSocket is not available
+    const startMessagePolling = () => {
+        if (!selectedUser) return;
+        
+        const pollMessages = async () => {
+            try {
+                const { data } = await axios.get(`/api/messages/${selectedUser._id}`);
+                if (data.success && data.messages.length > messages.length) {
+                    setMessages(data.messages);
+                }
+            } catch (error) {
+                console.log('Error polling messages:', error);
+            }
+        };
+        
+        // Poll every 5 seconds when chat is active
+        const interval = setInterval(pollMessages, 5000);
+        return () => clearInterval(interval);
+    }
 
 // Function to unsubscribe from messages
     const unsubscribeFromMessages = () => {
-        if(socket) socket.off("newMessage");
+        if(socket && isWebSocketEnabled) socket.off("newMessage");
     }
 
     useEffect(() => {
