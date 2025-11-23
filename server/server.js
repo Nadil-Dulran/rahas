@@ -38,22 +38,32 @@ io.on("connection", (socket) => {
     })
 })
 
-// === CORS + body parsers (replace your existing app.use(cors()) and express.json limit)
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+// === CORS Configuration ===
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://rahas.vercel.app",
+  process.env.FRONTEND_ORIGIN
+].filter(Boolean); // Remove any undefined values
 
 app.use(cors({
-  origin: FRONTEND_ORIGIN,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes("*")) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
   allowedHeaders: ["Content-Type", "token", "Authorization", "Accept"],
   credentials: true,
   preflightContinue: false,
   optionsSuccessStatus: 204
 }));
-    
 
-
-// Middleware
-app.use(cors());
+// Body parser middleware
 app.use(express.json({ limit: "20mb" }));
 
 // Health check route
