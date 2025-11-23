@@ -4,8 +4,9 @@ import { formatMessageTime } from '../lib/utils.js'
 import { ChatContext } from '../../context/ChatContext.jsx'
 import { AuthContext } from '../../context/AuthContext.jsx'
 import toast from 'react-hot-toast'
+import RightSidebar from './RightSidebar.jsx'
 
-const ChatContainer = () => {
+const ChatContainer = ({ showRightSidebar, setShowRightSidebar }) => {
 
     const { messages, selectedUser, setSelectedUser, sendMessage, getMessages } = useContext(ChatContext)
 
@@ -58,7 +59,7 @@ const ChatContainer = () => {
             <img src={selectedUser.profilePic || assets.avatar_icon} alt="" className="w-8 rounded-full" />
             <p className='flex-1 text-lg text-blue-400 flex items-center gap-2'>{selectedUser.fullName} {onlineUsers.includes(selectedUser._id) && <span className="w-2 h-2 rounded-full bg-green-500"></span>}</p>
             <img onClick={() => setSelectedUser(null)} src={assets.arrow_icon} alt="" className='md:hidden max-w-7' />
-            <img src={assets.help_icon} alt="" className='max-md:hidden max-w-5' />
+            <img onClick={() => setShowRightSidebar(!showRightSidebar)} src={assets.help_icon} alt="" className='max-md:hidden max-w-5 cursor-pointer' />
         </div>
         {/* Chat Messages */}
         <div className='flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3 pb-6'>
