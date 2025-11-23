@@ -11,43 +11,32 @@ import {Server} from "socket.io";
 const app = express();
 const server = http.createServer(app);
 
-// Initialize Socket.io server only if not in production or if explicitly enabled
-let io = null;
-let userSocketMap = {};
+// Initialize Socket.io server
+export const io = new Server(server, {
+    cors: {
+        origin: "*"
+    }
+})
 
-if (process.env.NODE_ENV !== "production" || process.env.ENABLE_WEBSOCKETS === "true") {
-    io = new Server(server, {
-        cors: {
-            origin: process.env.FRONTEND_ORIGIN || "*",
-            credentials: true
-        }
-    });
-    
-    // Store online users
-    userSocketMap = {}; // { userId: socketId }
-}
+// Store online users
+export const userSocketMap = {}; // { userId: socketId }
 
-// Socket.io connection handling (only if io exists)
-if (io) {
-    io.on("connection", (socket) => {
-        const userId = socket.handshake.query.userId;
-        console.log("User connected", userId );
+// Socket.io connection handling
+io.on("connection", (socket) => {
+    const userId = socket.handshake.query.userId;
+    console.log("User connected", userId );
 
-        if(userId) userSocketMap[userId] = socket.id;
+    if(userId) userSocketMap[userId] = socket.id;
 
-        // Emit online users to all connected clients
+    // Emit online users to all connected clients
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+    socket.on("disconnect", () => {
+        console.log("User disconnected", userId);
+        delete userSocketMap[userId];
         io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-        socket.on("disconnect", () => {
-            console.log("User disconnected", userId);
-            delete userSocketMap[userId];
-            io.emit("getOnlineUsers", Object.keys(userSocketMap));
-        })
     })
-}
-
-// Export io and userSocketMap for use in other modules
-export { io, userSocketMap };
+})
 
 // === CORS + body parsers (replace your existing app.use(cors()) and express.json limit)
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
@@ -72,25 +61,6 @@ app.use("/api/status", (req, res) => res.send("Server is running..."));
 app.use("/api/auth", userRoutes);
 app.use("/api/messages", messageRoutes);
 
-// Add a route to check WebSocket status
-app.get("/api/websocket-status", (req, res) => {
-    res.json({ 
-        enabled: !!io, 
-        environment: process.env.NODE_ENV,
-        onlineUsers: Object.keys(userSocketMap).length
-    });
-});
-
-// Add route to get online users via HTTP (fallback when WebSockets aren't available)
-app.get("/api/auth/online-users", (req, res) => {
-    res.json({ 
-        success: true, 
-        onlineUsers: Object.keys(userSocketMap),
-        count: Object.keys(userSocketMap).length,
-        websocketEnabled: !!io
-    });
-});
-
 // Database connection (MongooDB)
 await connectDB();
 
@@ -100,11 +70,10 @@ await connectDB();
 const PORT = process.env.PORT || 5001;
 
 if (process.env.NODE_ENV !== "production") {
-    server.listen(PORT, () => {
-        console.log("Server is running on port: " + PORT);
-        console.log("WebSockets enabled:", !!io);
-    });
+    const PORT = process.env.PORT || 5001;
+    server.listen(PORT, () => console.log("Server is running on port: " + PORT));
 }
 
-// Export app for Vercel (instead of server to avoid WebSocket issues)
-export default process.env.NODE_ENV === "production" ? app : server;
+
+// Export server for Vercel
+export default server;
