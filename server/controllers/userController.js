@@ -105,5 +105,20 @@ export const updateProfile = async (req, res) => {
     console.error("UPDATE PROFILE ERROR:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
-};           
+};
 
+// Controller to get all users except the authenticated user
+export const getUsers = async (req, res) => {
+  try {
+    const loggedInUserId = req.user._id;
+    const users = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+    
+    // Initialize unseen messages object (can be expanded with actual message logic)
+    const unseenMessages = {};
+    
+    res.json({ success: true, users, unseenMessages });
+  } catch (error) {
+    console.error("GET USERS ERROR:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

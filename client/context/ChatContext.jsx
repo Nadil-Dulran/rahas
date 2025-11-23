@@ -16,7 +16,7 @@ export const ChatProvider = ({ children }) => {
 // Function to get all users for sidebar
     const getUsers = async () => {
         try {
-            const { data } = await axios.get("/api/users/users");
+            const { data } = await axios.get("/api/auth/users");
             if(data.success){
                 setUsers(data.users)
                 setUnseenMessages(data.unseenMessages)
