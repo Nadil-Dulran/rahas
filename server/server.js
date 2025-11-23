@@ -38,32 +38,22 @@ io.on("connection", (socket) => {
     })
 })
 
-// === CORS Configuration ===
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://rahas.vercel.app",
-  process.env.FRONTEND_ORIGIN
-].filter(Boolean); // Remove any undefined values
+// === CORS + body parsers (replace your existing app.use(cors()) and express.json limit)
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes("*")) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: FRONTEND_ORIGIN,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
   allowedHeaders: ["Content-Type", "token", "Authorization", "Accept"],
   credentials: true,
   preflightContinue: false,
   optionsSuccessStatus: 204
 }));
+    
 
-// Body parser middleware
+
+// Middleware
+app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 
 // Routes setup
