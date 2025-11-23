@@ -66,27 +66,23 @@ app.use(cors({
 // Body parser middleware
 app.use(express.json({ limit: "20mb" }));
 
-// Health check route
-app.get("/", (req, res) => {
-  res.json({ status: "ok", message: "Server is running..." });
-});
-
 // Routes setup
-app.use("/api/status", (req, res) => res.json({ status: "ok", message: "API is running" }));
+app.use("/api/status", (req, res) => res.send("Server is running..."));
 app.use("/api/auth", userRoutes);
 app.use("/api/messages", messageRoutes);
 
-// Database connection (MongoDB)
-connectDB().catch(err => console.error("MongoDB connection error:", err));
+// Database connection (MongooDB)
+await connectDB();
 
 
 
-// Start server (only in development)
+// Start server
 const PORT = process.env.PORT || 5001;
 
-if (process.env.NODE_ENV !== "production") {
-  server.listen(PORT, () => console.log("Server is running on port: " + PORT));
+if (!process.env.NODE_ENV !== "production") {
+
+server.listen(PORT, () => console.log("Server is running on port: " + PORT));
 }
 
-// Export app for Vercel
-export default app;
+// Export server for Vercel
+export default server;
