@@ -23,17 +23,17 @@ export const userSocketMap = {}; // { userId: socketId }
 
 // Socket.io connection handling
 io.on("connection", (socket) => {
-    const userID = socket.handshake.query.userID;
-    console.log("User connected", userID );
+    const userId = socket.handshake.query.userId;
+    console.log("User connected", userId );
 
-    if(userID) userSocketMap[userID] = socket.id;
+    if(userId) userSocketMap[userId] = socket.id;
 
     // Emit online users to all connected clients
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
     socket.on("disconnect", () => {
-        console.log("User disconnected", userID);
-        delete userSocketMap[userID];
+        console.log("User disconnected", userId);
+        delete userSocketMap[userId];
         io.emit("getOnlineUsers", Object.keys(userSocketMap));
     })
 })
