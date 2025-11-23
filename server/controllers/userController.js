@@ -122,27 +122,3 @@ export const getUsers = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// Controller to get online users (polling alternative for production)
-export const getOnlineUsers = async (req, res) => {
-  try {
-    // Update current user's last seen timestamp
-    await User.findByIdAndUpdate(req.user._id, { 
-      lastSeen: new Date() 
-    });
-
-    // Get users who were active in the last 30 seconds
-    const thirtySecondsAgo = new Date(Date.now() - 30000);
-    const onlineUsers = await User.find({ 
-      lastSeen: { $gte: thirtySecondsAgo },
-      _id: { $ne: req.user._id }
-    }).select("_id");
-
-    const onlineUserIds = onlineUsers.map(user => user._id.toString());
-    
-    res.json({ success: true, onlineUsers: onlineUserIds });
-  } catch (error) {
-    console.error("GET ONLINE USERS ERROR:", error);
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};

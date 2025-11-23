@@ -102,17 +102,7 @@ const updateProfile = async (body) => {
 
     // Connect socket function to handle socket connection and online users updates
     const connectSocket = (userData) => {
-        // Skip socket connection on production/Vercel deployment
         if(!userData || socket?.connected) return;
-        
-        // Only connect to socket if backend URL includes localhost (development mode)
-        if (!backendUrl || !backendUrl.includes('localhost')) {
-            console.log('Using polling for online status - production mode');
-            // Use polling instead of WebSocket for production
-            startPollingOnlineUsers();
-            return;
-        }
-        
         const newSocket = io(backendUrl, {
             query: { userId: userData._id,
             }
@@ -123,24 +113,6 @@ const updateProfile = async (body) => {
         newSocket.on("getOnlineUsers", (userIds) => {
             setOnlineUsers(userIds);
         })
-    }
-
-    // Polling alternative for production (Vercel)
-    const startPollingOnlineUsers = () => {
-        // Poll every 10 seconds to get online users
-        const pollInterval = setInterval(async () => {
-            try {
-                const { data } = await axios.get("/api/auth/online-users");
-                if (data.success) {
-                    setOnlineUsers(data.onlineUsers || []);
-                }
-            } catch (error) {
-                console.error("Failed to fetch online users:", error);
-            }
-        }, 10000); // Poll every 10 seconds
-
-        // Store interval ID for cleanup
-        return () => clearInterval(pollInterval);
     }
 
     useEffect(() => {
