@@ -67,5 +67,10 @@ await connectDB();
 
 
 // Start server
+if (process.env.NODE_ENV !== "production") {
 const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => console.log("Server is running on port: " + PORT));
+}
+
+// Export server for deployment
+export default server;
