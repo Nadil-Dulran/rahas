@@ -23,7 +23,7 @@ export default function checkDomain(req, res, next) {
     if (!domain || !allowedDomains.includes(domain)) {
       return res.status(403).json({
         success: false,
-        message: "Signup restricted. This email domain is not allowed."
+        message: "Signup restricted - Request access Contact - nadilgamage@gmail.com"
       });
     }
 
