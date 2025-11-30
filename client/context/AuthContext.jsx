@@ -43,11 +43,20 @@ const checkAuth = async () => {
             } else{
                 toast.error(data.message);
             }
-
-        } catch (error) {
-            toast.error(error.message)
+    } catch (error) {
+        // Domain restriction from backend (403)
+        if (error?.response?.status === 403) {
+            const message =
+                error?.response?.data?.message || "Signup restricted — request access";
+            toast.error(message);
+            return;
         }
+
+        // Other errors
+        const msg = error?.response?.data?.message || error.message;
+        toast.error(msg);
     }
+}
 
 // Logout function to handle user logout and disconnect socket
 
