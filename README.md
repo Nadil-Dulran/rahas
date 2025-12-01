@@ -1,4 +1,4 @@
-# 🕵️‍♂️ Rahas — Secure & Private Messaging App
+# 🕵️‍♂️ RahasChat — Secure & Private Messaging App
 
 Rahas is a private, real-time messaging app built with the MERN stack (MongoDB, Express, React, Node.js) and Socket.io for live updates.
 
@@ -8,7 +8,7 @@ Note: Sign-in to the deployed app requires access approval. To request access, c
 
 ---
 
-## 🚀 Main Features (implemented)
+## 🚀 Main Features
 
 - Real-time chat between users (Socket.io)
 - User search and list in the left sidebar
@@ -81,10 +81,4 @@ Open `http://localhost:5173` (or the port Vite shows) to use the app locally.
 
 ---
 
-## License
-
-This repo does not include a license file. Add one if you want to make the project open source.
-
----
-
-Thanks for trying Rahas — let me know if you want the README to include screenshots, API docs, or environment variable examples.
+Thanks for trying RahasChat
