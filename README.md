@@ -80,5 +80,4 @@ Open `http://localhost:5173` (or the port Vite shows) to use the app locally.
 - For issues, feature requests, or contributions, open an issue or contact the owner.
 
 ---
-
 Thanks for trying RahasChat
